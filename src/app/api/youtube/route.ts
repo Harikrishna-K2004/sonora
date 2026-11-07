@@ -1,5 +1,24 @@
-
 import { NextRequest, NextResponse } from "next/server";
+
+interface YouTubeSearchItem {
+  id: {
+    videoId?: string;
+  };
+  snippet: {
+    title: string;
+    channelTitle: string;
+    publishedAt: string;
+    thumbnails?: {
+      high?: { url: string };
+      medium?: { url: string };
+      default?: { url: string };
+    };
+  };
+}
+
+interface YouTubeSearchResponse {
+  items?: YouTubeSearchItem[];
+}
 
 export async function GET(request: NextRequest) {
   try {
@@ -47,12 +66,12 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const data = await response.json();
+    const data: YouTubeSearchResponse = await response.json();
 
     const results = (data.items || [])
-      .filter((item: any) => item.id?.videoId)
-      .map((item: any) => ({
-        videoId: item.id.videoId,
+      .filter((item) => item.id?.videoId)
+      .map((item) => ({
+        videoId: item.id.videoId!,
         title: item.snippet.title,
         artist: item.snippet.channelTitle,
         thumbnail:
@@ -67,7 +86,6 @@ export async function GET(request: NextRequest) {
       results,
       total: results.length,
     });
-
   } catch (error) {
     console.error("Search error:", error);
 
